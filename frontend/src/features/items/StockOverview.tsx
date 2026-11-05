@@ -27,19 +27,14 @@ export const StockOverview: React.FC = () => {
   const fetchStocks = async () => {
     setLoading(true);
     try {
-      const params: any = { search, ...(filterAlmacenID ? { almacen_id: filterAlmacenID } : {}) };
+      const params = { search, ...(filterAlmacenID ? { almacen_id: filterAlmacenID } : {}) };
       const res = await api.get('/stock', { params });
       setStocks(res.data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchStocks();
-  }, [search, filterAlmacenID]);
+  useEffect(() => { fetchStocks(); }, [search, filterAlmacenID]);
 
   const canManage = hasRole('Administrador', 'Encargado de almacén');
   const columns = useStockColumns({
@@ -54,11 +49,8 @@ export const StockOverview: React.FC = () => {
 
   const exportHeaders = ['SKU', 'Insumo', 'Almacén', 'Cantidad', 'Stock Mínimo', 'Último Conteo'];
   const exportRows = stocks.map((s) => [
-    s.item?.sku || '',
-    s.item?.nombre || '',
-    s.almacen?.nombre || '',
-    s.cantidad,
-    s.item?.stock_minimo || 0,
+    s.item?.sku || '', s.item?.nombre || '', s.almacen?.nombre || '',
+    s.cantidad, s.item?.stock_minimo || 0,
     s.ultimo_conteo ? new Date(s.ultimo_conteo).toLocaleDateString() : '',
   ]);
 
@@ -76,15 +68,9 @@ export const StockOverview: React.FC = () => {
       </div>
 
       <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-3">
-        <select
-          value={filterAlmacenID}
-          onChange={(e) => setFilterAlmacenID(e.target.value)}
-          className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-        >
+        <select value={filterAlmacenID} onChange={(e) => setFilterAlmacenID(e.target.value)} className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-medium text-slate-700">
           <option value="">Todos los Almacenes</option>
-          {almacenes.map((w) => (
-            <option key={w.id} value={w.id}>{w.nombre} ({w.codigo})</option>
-          ))}
+          {almacenes.map((w) => <option key={w.id} value={w.id}>{w.nombre} ({w.codigo})</option>)}
         </select>
         {filterAlmacenID && (
           <button onClick={() => setFilterAlmacenID('')} className="text-xs text-rose-600 hover:text-rose-700 font-semibold ml-auto">
@@ -94,7 +80,6 @@ export const StockOverview: React.FC = () => {
       </div>
 
       <DataTable columns={columns} data={stocks} isLoading={loading} searchPlaceholder="Buscar por SKU o nombre..." onSearchChange={setSearch} />
-
       {isAjusteOpen && selectedStockItem && (
         <AjusteStockModal isOpen={isAjusteOpen} onClose={() => setIsAjusteOpen(false)} item={selectedStockItem} onSuccess={fetchStocks} />
       )}

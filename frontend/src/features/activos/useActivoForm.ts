@@ -21,6 +21,15 @@ export function useActivoForm(assetToEdit?: Asset | null, onSuccess?: () => void
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const refreshProveedores = async (newID?: number) => {
+    try {
+      const res = await api.get('/proveedores');
+      const list = res.data || [];
+      setProveedores(list);
+      if (newID) setProveedorID(newID);
+    } catch (err) { console.error(err); }
+  };
+
   useEffect(() => {
     Promise.all([
       api.get('/modelos'), api.get('/almacenes'),
@@ -62,7 +71,7 @@ export function useActivoForm(assetToEdit?: Asset | null, onSuccess?: () => void
   };
 
   return {
-    modelos, almacenes, proveedores, estados,
+    modelos, almacenes, proveedores, estados, refreshProveedores,
     codigoActivo, setCodigoActivo, numeroSerie, setNumeroSerie,
     modeloID, setModeloID, almacenID, setAlmacenID, estadoID, setEstadoID,
     proveedorID, setProveedorID, precio, setPrecio,
@@ -70,4 +79,3 @@ export function useActivoForm(assetToEdit?: Asset | null, onSuccess?: () => void
     notas, setNotas, loading, error, handleSubmit,
   };
 }
-

@@ -81,7 +81,7 @@ func SetupRoutes(r *gin.Engine, c *RouterContainer) {
 			protected.POST("/modelos", middleware.RequireRoles("Administrador"), c.Catalog.CreateModel)
 			protected.GET("/estados-equipo", c.Catalog.ListEquipmentStates)
 			protected.GET("/proveedores", c.Catalog.ListSuppliers)
-			protected.POST("/proveedores", middleware.RequireRoles("Administrador"), c.Catalog.CreateSupplier)
+			protected.POST("/proveedores", middleware.RequireRoles("Administrador", "Encargado de almacén"), c.Catalog.CreateSupplier)
 
 			// Almacenes
 			protected.GET("/almacenes", c.Warehouse.List)

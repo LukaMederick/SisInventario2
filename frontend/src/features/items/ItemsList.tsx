@@ -33,20 +33,15 @@ export const ItemsList: React.FC = () => {
   const fetchItems = async () => {
     setLoading(true);
     try {
-      const params: any = { page, limit: 15, search, ...(categoriaID ? { categoria_id: categoriaID } : {}) };
+      const params = { page, limit: 15, search, ...(categoriaID ? { categoria_id: categoriaID } : {}) };
       const res = await api.get('/items', { params });
       setItems(res.data.data || []);
       setTotal(res.data.total || 0);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchItems();
-  }, [page, search, categoriaID]);
+  useEffect(() => { fetchItems(); }, [page, search, categoriaID]);
 
   const canManage = hasRole('Administrador', 'Encargado de almacén');
   const columns = useItemColumns({
@@ -75,27 +70,17 @@ export const ItemsList: React.FC = () => {
           <ExportButtons title="Catálogo de Insumos" filename="insumos" headers={exportHeaders} data={exportRows} />
           {canManage && (
             <button onClick={() => { setSelectedItem(null); setIsFormOpen(true); }} className="inline-flex items-center px-3.5 py-2 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl transition shadow-sm">
-              <Plus className="w-4 h-4 mr-1.5" />
-              Nuevo Insumo
+              <Plus className="w-4 h-4 mr-1.5" /> Nuevo Insumo
             </button>
           )}
         </div>
       </div>
 
       <ItemsFilterBar categoriaID={categoriaID} setCategoriaID={setCategoriaID} categorias={categorias} />
-
       <DataTable
-        columns={columns}
-        data={items}
-        isLoading={loading}
-        totalItems={total}
-        currentPage={page}
-        pageSize={15}
-        onPageChange={setPage}
-        searchPlaceholder="Buscar por SKU, nombre..."
-        onSearchChange={(val) => { setSearch(val); setPage(1); }}
+        columns={columns} data={items} isLoading={loading} totalItems={total} currentPage={page} pageSize={15}
+        onPageChange={setPage} searchPlaceholder="Buscar por SKU, nombre..." onSearchChange={(val) => { setSearch(val); setPage(1); }}
       />
-
       {isFormOpen && <ItemFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} onSuccess={fetchItems} itemToEdit={selectedItem} />}
       {isEntradaOpen && selectedItem && <EntradaStockModal isOpen={isEntradaOpen} onClose={() => setIsEntradaOpen(false)} item={selectedItem} onSuccess={fetchItems} />}
       {isAjusteOpen && selectedItem && <AjusteStockModal isOpen={isAjusteOpen} onClose={() => setIsAjusteOpen(false)} item={selectedItem} onSuccess={fetchItems} />}

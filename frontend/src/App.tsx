@@ -16,6 +16,7 @@ import { CatalogosHub } from './features/catalogos/CatalogosHub';
 import { AlmacenesList } from './features/almacenes/AlmacenesList';
 import { UsuariosList } from './features/usuarios/UsuariosList';
 import { AuditoriaList } from './features/auditoria/AuditoriaList';
+import { ReportesView } from './features/reportes/ReportesView';
 
 export function App() {
   return (
@@ -36,9 +37,11 @@ export function App() {
             <Route path="/asignaciones" element={<AsignacionesList />} />
             <Route path="/mantenimientos" element={<MantenimientosList />} />
             <Route path="/catalogos" element={<CatalogosHub />} />
+            <Route path="/proveedores" element={<Navigate to="/catalogos?tab=proveedores" replace />} />
             <Route path="/almacenes" element={<AlmacenesList />} />
             <Route path="/usuarios" element={<UsuariosList />} />
             <Route path="/auditoria" element={<AuditoriaList />} />
+            <Route path="/reportes" element={<ReportesView />} />
           </Route>
 
           {/* Catch-all */}
@@ -50,4 +53,3 @@ export function App() {
 }
 
 export default App;
-

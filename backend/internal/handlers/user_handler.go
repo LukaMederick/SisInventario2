@@ -40,14 +40,11 @@ func (h *UserHandler) Create(c *gin.Context) {
 		h.JSONError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	creatorID := h.GetUserID(c)
-	user, err := h.Service.Register(req.Email, req.Password, req.NombreCompleto, req.Telefono, req.RolID, creatorID)
+	user, err := h.Service.Register(req.Email, req.Password, req.NombreCompleto, req.Telefono, req.RolID, h.GetUserID(c))
 	if err != nil {
 		h.JSONError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
 	c.JSON(http.StatusCreated, user)
 }
 
@@ -57,20 +54,16 @@ func (h *UserHandler) Update(c *gin.Context) {
 		h.JSONError(c, http.StatusBadRequest, "ID inválido")
 		return
 	}
-
 	var updates map[string]interface{}
 	if err := c.ShouldBindJSON(&updates); err != nil {
 		h.JSONError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	editorID := h.GetUserID(c)
-	user, err := h.Service.UpdateUser(targetID, updates, editorID)
+	user, err := h.Service.UpdateUser(targetID, updates, h.GetUserID(c))
 	if err != nil {
 		h.JSONError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
 	h.JSONSuccess(c, user)
 }
 
@@ -84,19 +77,14 @@ func (h *UserHandler) AssignWarehouses(c *gin.Context) {
 		h.JSONError(c, http.StatusBadRequest, "ID inválido")
 		return
 	}
-
 	var req AssignWarehousesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.JSONError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	editorID := h.GetUserID(c)
-	if err := h.Service.AssignUserWarehouses(targetID, req.AlmacenesIDs, editorID); err != nil {
+	if err := h.Service.AssignUserWarehouses(targetID, req.AlmacenesIDs, h.GetUserID(c)); err != nil {
 		h.JSONError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	h.JSONSuccess(c, gin.H{"message": "Permisos actualizados correctamente"})
 }
-

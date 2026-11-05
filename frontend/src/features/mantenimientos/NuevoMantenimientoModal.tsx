@@ -11,13 +11,10 @@ interface NuevoMantenimientoModalProps {
 }
 
 export const NuevoMantenimientoModal: React.FC<NuevoMantenimientoModalProps> = ({
-  isOpen,
-  onClose,
-  onSuccess,
+  isOpen, onClose, onSuccess,
 }) => {
   const [activos, setActivos] = useState<Asset[]>([]);
   const [proveedores, setProveedores] = useState<Supplier[]>([]);
-
   const [activoID, setActivoID] = useState<number>(0);
   const [tipo, setTipo] = useState('correctivo');
   const [descripcion, setDescripcion] = useState('');
@@ -28,43 +25,26 @@ export const NuevoMantenimientoModal: React.FC<NuevoMantenimientoModalProps> = (
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchOptions = async () => {
-      try {
-        const [actRes, supRes] = await Promise.all([
-          api.get('/activos', { params: { limit: 100 } }),
-          api.get('/proveedores'),
-        ]);
+    Promise.all([api.get('/activos', { params: { limit: 100 } }), api.get('/proveedores')])
+      .then(([actRes, supRes]) => {
         const list = actRes.data.data || [];
         setActivos(list);
         setProveedores(supRes.data || []);
         if (list.length > 0) setActivoID(list[0].id);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchOptions();
+      }).catch(console.error);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activoID) {
-      setError('Selecciona el equipo a ingresar a mantenimiento');
-      return;
-    }
+    if (!activoID) { setError('Selecciona el equipo a ingresar a mantenimiento'); return; }
     setLoading(true);
     setError(null);
-    const payload: any = {
-      activo_id: Number(activoID),
-      tipo,
-      descripcion,
-      costo: Number(costo),
-      fecha_inicio: fechaInicio,
-      estado: 'pendiente',
-      ...(proveedorID ? { proveedor_id: Number(proveedorID) } : {}),
-    };
-
     try {
-      await api.post('/mantenimientos', payload);
+      await api.post('/mantenimientos', {
+        activo_id: Number(activoID), tipo, descripcion, costo: Number(costo),
+        fecha_inicio: fechaInicio, estado: 'pendiente',
+        ...(proveedorID ? { proveedor_id: Number(proveedorID) } : {}),
+      });
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -75,13 +55,7 @@ export const NuevoMantenimientoModal: React.FC<NuevoMantenimientoModalProps> = (
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Nuevo Registro de Mantenimiento"
-      subtitle="Envía un activo a servicio técnico preventivo o correctivo"
-      maxWidth="md"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Nuevo Registro de Mantenimiento" subtitle="Envía un activo a servicio técnico preventivo o correctivo" maxWidth="md">
       {error && <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-xl border border-rose-200">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <NuevoMantenimientoFields

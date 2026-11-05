@@ -15,17 +15,10 @@ interface MovimientosFilterBarProps {
 }
 
 export const MovimientosFilterBar: React.FC<MovimientosFilterBarProps> = ({
-  tipo,
-  setTipo,
-  almacenID,
-  setAlmacenID,
-  desde,
-  setDesde,
-  hasta,
-  setHasta,
-  almacenes,
+  tipo, setTipo, almacenID, setAlmacenID, desde, setDesde, hasta, setHasta, almacenes,
 }) => {
   const hasFilters = Boolean(tipo || almacenID || desde || hasta);
+  const clear = () => { setTipo(''); setAlmacenID(''); setDesde(''); setHasta(''); };
 
   return (
     <div className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-wrap items-center gap-3">
@@ -34,11 +27,7 @@ export const MovimientosFilterBar: React.FC<MovimientosFilterBarProps> = ({
         Filtros:
       </div>
 
-      <select
-        value={tipo}
-        onChange={(e) => setTipo(e.target.value)}
-        className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-      >
+      <select value={tipo} onChange={(e) => setTipo(e.target.value)} className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-medium text-slate-700">
         <option value="">Todos los Tipos</option>
         <option value="entrada">Entrada</option>
         <option value="salida">Salida</option>
@@ -49,53 +38,26 @@ export const MovimientosFilterBar: React.FC<MovimientosFilterBarProps> = ({
         <option value="baja">Baja</option>
       </select>
 
-      <select
-        value={almacenID}
-        onChange={(e) => setAlmacenID(e.target.value)}
-        className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-      >
+      <select value={almacenID} onChange={(e) => setAlmacenID(e.target.value)} className="text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-medium text-slate-700">
         <option value="">Todos los Almacenes</option>
-        {almacenes.map((w) => (
-          <option key={w.id} value={w.id}>
-            {w.nombre} ({w.codigo})
-          </option>
-        ))}
+        {almacenes.map((w) => <option key={w.id} value={w.id}>{w.nombre} ({w.codigo})</option>)}
       </select>
 
       <div className="flex items-center space-x-1.5 text-xs text-slate-500">
         <span>Desde:</span>
-        <input
-          type="date"
-          value={desde}
-          onChange={(e) => setDesde(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs text-slate-700 focus:outline-none"
-        />
+        <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs text-slate-700" />
       </div>
 
       <div className="flex items-center space-x-1.5 text-xs text-slate-500">
         <span>Hasta:</span>
-        <input
-          type="date"
-          value={hasta}
-          onChange={(e) => setHasta(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs text-slate-700 focus:outline-none"
-        />
+        <input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1 text-xs text-slate-700" />
       </div>
 
       {hasFilters && (
-        <button
-          onClick={() => {
-            setTipo('');
-            setAlmacenID('');
-            setDesde('');
-            setHasta('');
-          }}
-          className="text-xs text-rose-600 hover:text-rose-700 font-semibold ml-auto"
-        >
+        <button onClick={clear} className="text-xs text-rose-600 hover:text-rose-700 font-semibold ml-auto">
           Limpiar filtros
         </button>
       )}
     </div>
   );
 };
-
