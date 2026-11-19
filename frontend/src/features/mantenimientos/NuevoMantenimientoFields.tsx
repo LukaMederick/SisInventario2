@@ -54,7 +54,7 @@ export const NuevoMantenimientoFields: React.FC<NuevoMantenimientoFieldsProps> =
         </select>
       </div>
       <div>
-        <label className="block text-xs font-semibold text-slate-700 mb-1">Costo Estimado ($ USD)</label>
+        <label className="block text-xs font-semibold text-slate-700 mb-1">Costo Estimado (S/.)</label>
         <input type="number" step="0.01" min="0" value={costo} onChange={(e) => setCosto(Number(e.target.value))} className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-800" />
       </div>
     </div>

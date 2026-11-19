@@ -22,79 +22,70 @@ type RouterContainer struct {
 
 func SetupRoutes(r *gin.Engine, c *RouterContainer) {
 	api := r.Group("/api")
-	{
-		// Rutas públicas
-		api.POST("/auth/login", c.Auth.Login)
+	api.POST("/auth/login", c.Auth.Login)
 
-		// Rutas protegidas por JWT
-		protected := api.Group("")
-		protected.Use(middleware.AuthMiddleware())
-		{
-			// Auth & Dashboard
-			protected.GET("/auth/profile", c.Auth.GetProfile)
-			protected.GET("/roles", c.Auth.ListRoles)
-			protected.GET("/dashboard", c.Dashboard.GetMetrics)
+	protected := api.Group("")
+	protected.Use(middleware.AuthMiddleware())
+	adminOnly := middleware.RequireRoles("Administrador")
+	adminOrWarehouse := middleware.RequireRoles("Administrador", "Encargado de almacén")
+	techRoles := middleware.RequireRoles("Administrador", "Encargado de almacén", "Técnico")
 
-			// Activos
-			act := protected.Group("/activos")
-			{
-				act.GET("", c.Asset.List)
-				act.GET("/:id", c.Asset.GetByID)
-				act.POST("", middleware.RequireRoles("Administrador", "Encargado de almacén", "Técnico"), c.Asset.Create)
-				act.PUT("/:id", middleware.RequireRoles("Administrador", "Encargado de almacén", "Técnico"), c.Asset.Update)
-				act.DELETE("/:id", middleware.RequireRoles("Administrador"), c.Asset.Delete)
-				act.POST("/:id/transferir", middleware.RequireRoles("Administrador", "Encargado de almacén"), c.Asset.Transferir)
-				act.POST("/:id/asignar", middleware.RequireRoles("Administrador", "Encargado de almacén", "Técnico"), c.Asset.Asignar)
-				act.POST("/:id/devolver", middleware.RequireRoles("Administrador", "Encargado de almacén", "Técnico"), c.Asset.Devolver)
-			}
+	protected.GET("/auth/profile", c.Auth.GetProfile)
+	protected.GET("/roles", c.Auth.ListRoles)
+	protected.GET("/dashboard", c.Dashboard.GetMetrics)
 
-			// Insumos y Stock
-			itm := protected.Group("/items")
-			{
-				itm.GET("", c.Stock.ListItems)
-				itm.GET("/:id", c.Stock.GetItemByID)
-				itm.POST("", middleware.RequireRoles("Administrador", "Encargado de almacén"), c.Stock.CreateItem)
-				itm.PUT("/:id", middleware.RequireRoles("Administrador", "Encargado de almacén"), c.Stock.UpdateItem)
-			}
+	// Activos
+	act := protected.Group("/activos")
+	act.GET("", c.Asset.List)
+	act.GET("/:id", c.Asset.GetByID)
+	act.POST("", techRoles, c.Asset.Create)
+	act.PUT("/:id", techRoles, c.Asset.Update)
+	act.DELETE("/:id", adminOnly, c.Asset.Delete)
+	act.POST("/:id/transferir", adminOrWarehouse, c.Asset.Transferir)
+	act.POST("/:id/asignar", techRoles, c.Asset.Asignar)
+	act.POST("/:id/devolver", techRoles, c.Asset.Devolver)
 
-			stk := protected.Group("/stock")
-			{
-				stk.GET("", c.Stock.GetStockByWarehouse)
-				stk.GET("/critico", c.Stock.GetCriticalStock)
-				stk.POST("/ajustar", middleware.RequireRoles("Administrador", "Encargado de almacén"), c.Stock.AjustarStock)
-				stk.POST("/entrada", middleware.RequireRoles("Administrador", "Encargado de almacén"), c.Stock.RegistrarEntrada)
-			}
+	// Items y Stock
+	protected.GET("/items", c.Stock.ListItems)
+	protected.GET("/items/:id", c.Stock.GetItemByID)
+	protected.POST("/items", adminOrWarehouse, c.Stock.CreateItem)
+	protected.PUT("/items/:id", adminOrWarehouse, c.Stock.UpdateItem)
+	protected.GET("/stock", c.Stock.GetStockByWarehouse)
+	protected.GET("/stock/critico", c.Stock.GetCriticalStock)
+	protected.POST("/stock/ajustar", adminOrWarehouse, c.Stock.AjustarStock)
+	protected.POST("/stock/entrada", adminOrWarehouse, c.Stock.RegistrarEntrada)
 
-			// Movimientos, Asignaciones, Mantenimientos
-			protected.GET("/movimientos", c.Movement.List)
-			protected.GET("/asignaciones", c.Assignment.List)
-			protected.GET("/mantenimientos", c.Maintenance.List)
-			protected.POST("/mantenimientos", middleware.RequireRoles("Administrador", "Encargado de almacén", "Técnico"), c.Maintenance.Create)
-			protected.PUT("/mantenimientos/:id/estado", middleware.RequireRoles("Administrador", "Encargado de almacén", "Técnico"), c.Maintenance.UpdateStatus)
+	// Movimientos, Asignaciones, Mantenimientos
+	protected.GET("/movimientos", c.Movement.List)
+	protected.POST("/movimientos", techRoles, c.Movement.Create)
+	protected.GET("/asignaciones", c.Assignment.List)
+	protected.GET("/mantenimientos", c.Maintenance.List)
+	protected.POST("/mantenimientos", techRoles, c.Maintenance.Create)
+	protected.PUT("/mantenimientos/:id/estado", techRoles, c.Maintenance.UpdateStatus)
 
-			// Catálogos
-			protected.GET("/categorias", c.Catalog.ListCategories)
-			protected.POST("/categorias", middleware.RequireRoles("Administrador"), c.Catalog.CreateCategory)
-			protected.GET("/marcas", c.Catalog.ListBrands)
-			protected.POST("/marcas", middleware.RequireRoles("Administrador"), c.Catalog.CreateBrand)
-			protected.GET("/modelos", c.Catalog.ListModels)
-			protected.POST("/modelos", middleware.RequireRoles("Administrador"), c.Catalog.CreateModel)
-			protected.GET("/estados-equipo", c.Catalog.ListEquipmentStates)
-			protected.GET("/proveedores", c.Catalog.ListSuppliers)
-			protected.POST("/proveedores", middleware.RequireRoles("Administrador", "Encargado de almacén"), c.Catalog.CreateSupplier)
+	// Catálogos
+	protected.GET("/categorias", c.Catalog.ListCategories)
+	protected.POST("/categorias", adminOnly, c.Catalog.CreateCategory)
+	protected.GET("/marcas", c.Catalog.ListBrands)
+	protected.POST("/marcas", adminOnly, c.Catalog.CreateBrand)
+	protected.GET("/modelos", c.Catalog.ListModels)
+	protected.POST("/modelos", adminOnly, c.Catalog.CreateModel)
+	protected.GET("/estados-equipo", c.Catalog.ListEquipmentStates)
+	protected.POST("/estados-equipo", adminOnly, c.Catalog.CreateEquipmentState)
+	protected.PUT("/estados-equipo/:id", adminOnly, c.Catalog.UpdateEquipmentState)
+	protected.DELETE("/estados-equipo/:id", adminOnly, c.Catalog.DeleteEquipmentState)
+	protected.GET("/proveedores", c.Catalog.ListSuppliers)
+	protected.POST("/proveedores", adminOrWarehouse, c.Catalog.CreateSupplier)
 
-			// Almacenes
-			protected.GET("/almacenes", c.Warehouse.List)
-			protected.POST("/almacenes", middleware.RequireRoles("Administrador"), c.Warehouse.Create)
-			protected.PUT("/almacenes/:id", middleware.RequireRoles("Administrador"), c.Warehouse.Update)
+	// Almacenes
+	protected.GET("/almacenes", c.Warehouse.List)
+	protected.POST("/almacenes", adminOnly, c.Warehouse.Create)
+	protected.PUT("/almacenes/:id", adminOnly, c.Warehouse.Update)
 
-			// Usuarios y Auditoría
-			protected.GET("/usuarios", middleware.RequireRoles("Administrador"), c.User.List)
-			protected.POST("/usuarios", middleware.RequireRoles("Administrador"), c.User.Create)
-			protected.PUT("/usuarios/:id", middleware.RequireRoles("Administrador"), c.User.Update)
-			protected.POST("/usuarios/:id/almacenes", middleware.RequireRoles("Administrador"), c.User.AssignWarehouses)
-			protected.GET("/auditoria", middleware.RequireRoles("Administrador", "Auditor"), c.Audit.List)
-		}
-	}
+	// Usuarios y Auditoría
+	protected.GET("/usuarios", adminOnly, c.User.List)
+	protected.POST("/usuarios", adminOnly, c.User.Create)
+	protected.PUT("/usuarios/:id", adminOnly, c.User.Update)
+	protected.POST("/usuarios/:id/almacenes", adminOnly, c.User.AssignWarehouses)
+	protected.GET("/auditoria", middleware.RequireRoles("Administrador", "Auditor"), c.Audit.List)
 }
-

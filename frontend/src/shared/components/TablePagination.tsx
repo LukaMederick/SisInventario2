@@ -9,10 +9,7 @@ interface TablePaginationProps {
 }
 
 export const TablePagination: React.FC<TablePaginationProps> = ({
-  currentPage,
-  totalPages,
-  total,
-  onPageChange,
+  currentPage, totalPages, total, onPageChange,
 }) => {
   if (totalPages <= 1) return null;
 
@@ -26,14 +23,14 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
         <button
           onClick={() => onPageChange && onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           onClick={() => onPageChange && onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -41,4 +38,3 @@ export const TablePagination: React.FC<TablePaginationProps> = ({
     </div>
   );
 };
-

@@ -2,6 +2,7 @@ import React from 'react';
 import { Asset } from '../../../core/types';
 import { Badge } from '../../../shared/components/Badge';
 import { QrCodeBadge } from '../../../shared/components/QrCodeBadge';
+import { formatSoles } from '../../../shared/utils/currency';
 
 interface ActivoInfoTabProps {
   activo: Asset;
@@ -47,7 +48,7 @@ export const ActivoInfoTab: React.FC<ActivoInfoTabProps> = ({ activo }) => {
           </div>
           <div>
             <span className="text-slate-400 block mb-0.5">Precio de Adquisición:</span>
-            <span className="font-mono font-bold text-slate-800">${Number(activo.precio).toFixed(2)}</span>
+            <span className="font-mono font-bold text-slate-800">{formatSoles(activo.precio)}</span>
           </div>
           <div>
             <span className="text-slate-400 block mb-0.5">Proveedor:</span>

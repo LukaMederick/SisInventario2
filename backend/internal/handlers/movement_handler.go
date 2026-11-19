@@ -25,9 +25,7 @@ func (h *MovementHandler) List(c *gin.Context) {
 
 	var desde, hasta *time.Time
 	if dStr := c.Query("desde"); dStr != "" {
-		if t, err := time.Parse("2006-01-02", dStr); err == nil {
-			desde = &t
-		}
+		if t, err := time.Parse("2006-01-02", dStr); err == nil { desde = &t }
 	}
 	if hStr := c.Query("hasta"); hStr != "" {
 		if t, err := time.Parse("2006-01-02", hStr); err == nil {
@@ -45,3 +43,15 @@ func (h *MovementHandler) List(c *gin.Context) {
 	h.JSONSuccess(c, gin.H{"data": movs, "total": total, "page": page, "limit": limit})
 }
 
+func (h *MovementHandler) Create(c *gin.Context) {
+	var input services.CreateMovementInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.JSONError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := h.Service.CreateManualMovement(&input, h.GetUserID(c)); err != nil {
+		h.JSONError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"message": "Movimiento registrado correctamente"})
+}

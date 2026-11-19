@@ -13,6 +13,7 @@ import { CategoryModal } from './modals/CategoryModal';
 import { BrandModal } from './modals/BrandModal';
 import { ModelModal } from './modals/ModelModal';
 import { SupplierModal } from './modals/SupplierModal';
+import { StateModal } from './modals/StateModal';
 
 type TabType = 'modelos' | 'categorias' | 'marcas' | 'estados' | 'proveedores';
 
@@ -27,7 +28,7 @@ export const CatalogosHub: React.FC = () => {
   const [modelos, setModelos] = useState<Model[]>([]);
   const [estados, setEstados] = useState<EquipmentState[]>([]);
   const [proveedores, setProveedores] = useState<Supplier[]>([]);
-
+  const [selectedState, setSelectedState] = useState<EquipmentState | null>(null);
   const [modal, setModal] = useState<TabType | null>(null);
 
   const fetchAll = async () => {
@@ -36,17 +37,20 @@ export const CatalogosHub: React.FC = () => {
         api.get('/categorias'), api.get('/marcas'), api.get('/modelos'),
         api.get('/estados-equipo'), api.get('/proveedores'),
       ]);
-      setCategorias(c.data || []);
-      setMarcas(b.data || []);
-      setModelos(m.data || []);
-      setEstados(e.data || []);
-      setProveedores(p.data || []);
-    } catch (err) {
-      console.error(err);
-    }
+      setCategorias(c.data || []); setMarcas(b.data || []); setModelos(m.data || []);
+      setEstados(e.data || []); setProveedores(p.data || []);
+    } catch (err) { console.error(err); }
   };
 
   useEffect(() => { fetchAll(); }, []);
+
+  const handleDeleteState = async (id: number) => {
+    if (!window.confirm('¿Estás seguro de eliminar este estado de equipo?')) return;
+    try {
+      await api.delete(`/estados-equipo/${id}`);
+      fetchAll();
+    } catch (err: any) { alert(err.response?.data?.error || 'Error al eliminar'); }
+  };
 
   const tabs = [
     { key: 'modelos', label: `Modelos (${modelos.length})`, icon: Laptop },
@@ -60,8 +64,7 @@ export const CatalogosHub: React.FC = () => {
     <div className="space-y-5">
       <div>
         <h2 className="text-xl font-bold text-slate-800 tracking-tight flex items-center">
-          <BookOpen className="w-5 h-5 mr-2 text-indigo-600" />
-          Catálogos Maestros del Sistema
+          <BookOpen className="w-5 h-5 mr-2 text-indigo-600" /> Catálogos Maestros del Sistema
         </h2>
         <p className="text-xs text-slate-500 mt-0.5">Configuración de modelos, categorías, marcas, estados y proveedores</p>
       </div>
@@ -70,15 +73,8 @@ export const CatalogosHub: React.FC = () => {
         {tabs.map((t) => {
           const Icon = t.icon;
           return (
-            <button
-              key={t.key}
-              onClick={() => setSearchParams({ tab: t.key })}
-              className={`flex items-center px-4 py-2.5 text-xs font-semibold border-b-2 transition ${
-                currentTab === t.key ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Icon className="w-4 h-4 mr-1.5" />
-              {t.label}
+            <button key={t.key} onClick={() => setSearchParams({ tab: t.key })} className={`flex items-center px-4 py-2.5 text-xs font-semibold border-b-2 transition ${currentTab === t.key ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}>
+              <Icon className="w-4 h-4 mr-1.5" /> {t.label}
             </button>
           );
         })}
@@ -87,12 +83,13 @@ export const CatalogosHub: React.FC = () => {
       {currentTab === 'modelos' && <ModelosTab modelos={modelos} canEdit={canEdit} onOpenCreate={() => setModal('modelos')} />}
       {currentTab === 'categorias' && <CategoriasTab categorias={categorias} canEdit={canEdit} onOpenCreate={() => setModal('categorias')} />}
       {currentTab === 'marcas' && <MarcasTab marcas={marcas} canEdit={canEdit} onOpenCreate={() => setModal('marcas')} />}
-      {currentTab === 'estados' && <EstadosTab estados={estados} />}
+      {currentTab === 'estados' && <EstadosTab estados={estados} canEdit={canEdit} onOpenCreate={() => { setSelectedState(null); setModal('estados'); }} onOpenEdit={(st) => { setSelectedState(st); setModal('estados'); }} onDelete={handleDeleteState} />}
       {currentTab === 'proveedores' && <ProveedoresTab proveedores={proveedores} canEdit={canEdit} onOpenCreate={() => setModal('proveedores')} />}
 
       {modal === 'categorias' && <CategoryModal isOpen onClose={() => setModal(null)} onSuccess={fetchAll} />}
       {modal === 'marcas' && <BrandModal isOpen onClose={() => setModal(null)} onSuccess={fetchAll} />}
       {modal === 'modelos' && <ModelModal isOpen onClose={() => setModal(null)} marcas={marcas} categorias={categorias} onSuccess={fetchAll} />}
+      {modal === 'estados' && <StateModal isOpen onClose={() => setModal(null)} onSuccess={fetchAll} stateToEdit={selectedState} />}
       {modal === 'proveedores' && <SupplierModal isOpen onClose={() => setModal(null)} onSuccess={fetchAll} />}
     </div>
   );

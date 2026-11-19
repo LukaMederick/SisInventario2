@@ -35,11 +35,7 @@ export const UserProfileDropdown: React.FC = () => {
           </div>
 
           <button
-            onClick={() => {
-              setIsOpen(false);
-              logout();
-              navigate('/login');
-            }}
+            onClick={() => { setIsOpen(false); logout(); navigate('/login'); }}
             className="w-full flex items-center px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 font-medium transition"
           >
             <LogOut className="w-4 h-4 mr-2" />
@@ -50,4 +46,3 @@ export const UserProfileDropdown: React.FC = () => {
     </div>
   );
 };
-

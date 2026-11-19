@@ -60,7 +60,7 @@ export const ActivosList: React.FC = () => {
     onOpenReturn: (a) => openModal('return', a),
   });
 
-  const exportHeaders = ['Código', 'Serie', 'Modelo', 'Almacén', 'Estado', 'Precio'];
+  const exportHeaders = ['Código', 'Serie', 'Modelo', 'Almacén', 'Estado', 'Precio (S/.)'];
   const exportRows = activos.map((a) => [a.codigo_activo, a.numero_serie, a.modelo?.nombre || '', a.almacen?.nombre || '', a.estado?.nombre || '', a.precio || 0]);
 
   return (

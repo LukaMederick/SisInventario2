@@ -23,7 +23,7 @@ export const ReportesView: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <ReportCard
           title="Inventario General de Activos"
-          description="Padrón completo de equipos informáticos, marcas, modelos, series, estados, ubicaciones y valorización en USD."
+          description="Padrón completo de equipos informáticos, marcas, modelos, series, estados, ubicaciones y valorización en Soles (S/.)."
           icon={Laptop}
           badge="Equipos TI"
           onExportExcel={() => exportActivos('excel')}

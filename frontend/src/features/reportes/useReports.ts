@@ -2,6 +2,7 @@ import { useState } from 'react';
 import api from '../../core/api/axios.config';
 import { exportToExcel } from './exportExcel';
 import { exportTablePdf } from './exportPdf';
+import { formatSoles } from '../../shared/utils/currency';
 
 export function useReports() {
   const [loadingKey, setLoadingKey] = useState<string | null>(null);
@@ -16,13 +17,13 @@ export function useReports() {
           'Código': a.codigo_activo, 'Serie': a.numero_serie, 'Modelo': a.modelo?.nombre,
           'Marca': a.modelo?.marca?.nombre, 'Categoría': a.modelo?.categoria?.nombre,
           'Almacén': a.almacen?.nombre, 'Estado': a.estado?.nombre, 'Condición': a.condicion,
-          'Precio ($)': a.precio, 'Ubicación': a.ubicacion_detalle || '—',
+          'Precio (S/.)': a.precio, 'Ubicación': a.ubicacion_detalle || '—',
         })), 'Inventario_Activos');
       } else {
-        const headers = ['Código', 'Serie', 'Modelo', 'Marca', 'Almacén', 'Estado', 'Condición', 'Precio ($)'];
+        const headers = ['Código', 'Serie', 'Modelo', 'Marca', 'Almacén', 'Estado', 'Condición', 'Precio (S/.)'];
         const rows = items.map((a: any) => [
           a.codigo_activo, a.numero_serie, a.modelo?.nombre || '—', a.modelo?.marca?.nombre || '—',
-          a.almacen?.nombre || '—', a.estado?.nombre || '—', a.condicion || '—', `$${Number(a.precio || 0).toFixed(2)}`,
+          a.almacen?.nombre || '—', a.estado?.nombre || '—', a.condicion || '—', formatSoles(a.precio),
         ]);
         exportTablePdf('Reporte General de Activos Informáticos', headers, rows, 'Inventario_Activos');
       }
@@ -74,15 +75,15 @@ export function useReports() {
       if (format === 'excel') {
         exportToExcel(items.map((mt: any) => ({
           'ID': mt.id, 'Activo': `${mt.activo?.codigo_activo} - ${mt.activo?.modelo?.nombre}`,
-          'Tipo': mt.tipo, 'Estado': mt.estado, 'Costo ($)': mt.costo,
+          'Tipo': mt.tipo, 'Estado': mt.estado, 'Costo (S/.)': mt.costo,
           'Proveedor / Taller': mt.proveedor?.nombre || 'Interno',
           'Fecha Inicio': mt.fecha_inicio ? mt.fecha_inicio.split('T')[0] : '—',
         })), 'Historial_Mantenimientos');
       } else {
-        const headers = ['ID', 'Activo', 'Tipo', 'Estado', 'Costo ($)', 'Taller / Proveedor', 'Fecha'];
+        const headers = ['ID', 'Activo', 'Tipo', 'Estado', 'Costo (S/.)', 'Taller / Proveedor', 'Fecha'];
         const rows = items.map((mt: any) => [
           mt.id, `${mt.activo?.codigo_activo || '—'}`, mt.tipo, mt.estado,
-          `$${Number(mt.costo || 0).toFixed(2)}`, mt.proveedor?.nombre || 'Interno',
+          formatSoles(mt.costo), mt.proveedor?.nombre || 'Interno',
           mt.fecha_inicio ? mt.fecha_inicio.split('T')[0] : '—',
         ]);
         exportTablePdf('Historial de Mantenimientos Técnicos', headers, rows, 'Historial_Mantenimientos');

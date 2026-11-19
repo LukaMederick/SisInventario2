@@ -14,10 +14,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const [isQrOpen, setIsQrOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleQrSuccess = (scannedCode: string) => {
-    navigate(`/activos?search=${encodeURIComponent(scannedCode)}`);
-  };
-
   return (
     <>
       <header className="h-16 bg-white border-b border-slate-200/80 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6">
@@ -34,17 +30,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             <span className="text-xs font-medium text-slate-500 hidden sm:inline">Almacén:</span>
             <select
               value={selectedWarehouse?.id || ''}
-              onChange={(e) => {
-                const wh = warehouses.find((w) => w.id === Number(e.target.value));
-                setSelectedWarehouse(wh || null);
-              }}
+              onChange={(e) => setSelectedWarehouse(warehouses.find((w) => w.id === Number(e.target.value)) || null)}
               className="text-xs font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer"
             >
               {hasRole('Administrador') && <option value="">Todos los almacenes</option>}
               {warehouses.map((w) => (
-                <option key={w.id} value={w.id}>
-                  {w.nombre} ({w.codigo})
-                </option>
+                <option key={w.id} value={w.id}>{w.nombre} ({w.codigo})</option>
               ))}
             </select>
           </div>
@@ -59,7 +50,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
             <QrCode className="w-4 h-4 text-emerald-600" />
             <span className="hidden sm:inline">Escanear QR</span>
           </button>
-
           <UserProfileDropdown />
         </div>
       </header>
@@ -68,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
         <QrScannerModal
           isOpen={isQrOpen}
           onClose={() => setIsQrOpen(false)}
-          onScanSuccess={handleQrSuccess}
+          onScanSuccess={(code) => navigate(`/activos?search=${encodeURIComponent(code)}`)}
         />
       )}
     </>

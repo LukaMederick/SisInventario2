@@ -43,7 +43,7 @@ export const MantenimientosList: React.FC = () => {
     onUpdate: (m) => { setSelectedMaint(m); setIsUpdateOpen(true); },
   });
 
-  const exportHeaders = ['Activo', 'Tipo', 'Descripción', 'Costo', 'Estado'];
+  const exportHeaders = ['Activo', 'Tipo', 'Descripción', 'Costo (S/.)', 'Estado'];
   const exportRows = mantenimientos.map((m) => [m.activo?.codigo_activo || '', m.tipo, m.descripcion, m.costo, m.estado]);
 
   return (

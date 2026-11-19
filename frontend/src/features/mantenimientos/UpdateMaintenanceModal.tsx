@@ -53,7 +53,7 @@ export const UpdateMaintenanceModal: React.FC<UpdateMaintenanceModalProps> = ({
           </select>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">Costo Final ($ USD)</label>
+          <label className="block text-xs font-semibold text-slate-700 mb-1">Costo Final (S/.)</label>
           <input
             type="number"
             step="0.01"

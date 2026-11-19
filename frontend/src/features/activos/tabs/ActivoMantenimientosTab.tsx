@@ -1,5 +1,6 @@
 import React from 'react';
 import { Maintenance } from '../../../core/types';
+import { formatSoles } from '../../../shared/utils/currency';
 
 interface ActivoMantenimientosTabProps {
   mantenimientos: Maintenance[];
@@ -23,7 +24,7 @@ export const ActivoMantenimientosTab: React.FC<ActivoMantenimientosTabProps> = (
             <th className="px-3 py-2">Tipo</th>
             <th className="px-3 py-2">Descripción</th>
             <th className="px-3 py-2">Proveedor</th>
-            <th className="px-3 py-2">Costo</th>
+            <th className="px-3 py-2">Costo (S/.)</th>
             <th className="px-3 py-2">Fecha Inicio</th>
             <th className="px-3 py-2">Estado</th>
           </tr>
@@ -34,7 +35,7 @@ export const ActivoMantenimientosTab: React.FC<ActivoMantenimientosTabProps> = (
               <td className="px-3 py-2.5 capitalize font-semibold">{m.tipo}</td>
               <td className="px-3 py-2.5 max-w-xs truncate">{m.descripcion}</td>
               <td className="px-3 py-2.5">{m.proveedor?.nombre || 'Interno'}</td>
-              <td className="px-3 py-2.5 font-mono">${Number(m.costo).toFixed(2)}</td>
+              <td className="px-3 py-2.5 font-mono">{formatSoles(m.costo)}</td>
               <td className="px-3 py-2.5">{new Date(m.fecha_inicio).toLocaleDateString()}</td>
               <td className="px-3 py-2.5">
                 <span className="capitalize px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 font-semibold text-[10px]">
@@ -48,4 +49,3 @@ export const ActivoMantenimientosTab: React.FC<ActivoMantenimientosTabProps> = (
     </div>
   );
 };
-

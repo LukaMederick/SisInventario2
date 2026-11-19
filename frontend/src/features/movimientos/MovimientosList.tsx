@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Plus } from 'lucide-react';
 import api from '../../core/api/axios.config';
 import { useAuth } from '../../core/context/AuthContext';
 import { Movement, Warehouse } from '../../core/types';
@@ -7,13 +7,15 @@ import { DataTable } from '../../shared/components/DataTable';
 import { ExportButtons } from '../../shared/components/ExportButtons';
 import { useMovimientoColumns } from './useMovimientoColumns';
 import { MovimientosFilterBar } from './MovimientosFilterBar';
+import { RegistrarMovimientoModal } from './RegistrarMovimientoModal';
 
 export const MovimientosList: React.FC = () => {
-  const { selectedWarehouse } = useAuth();
+  const { selectedWarehouse, hasRole } = useAuth();
   const [movimientos, setMovimientos] = useState<Movement[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [tipo, setTipo] = useState('');
   const [almacenID, setAlmacenID] = useState<string>(selectedWarehouse ? String(selectedWarehouse.id) : '');
@@ -28,33 +30,25 @@ export const MovimientosList: React.FC = () => {
   const fetchMovements = async () => {
     setLoading(true);
     try {
-      const params: any = { page, limit: 20, ...(tipo ? { tipo } : {}), ...(almacenID ? { almacen_id: almacenID } : {}), ...(desde ? { desde } : {}), ...(hasta ? { hasta } : {}) };
+      const params = { page, limit: 20, ...(tipo ? { tipo } : {}), ...(almacenID ? { almacen_id: almacenID } : {}) };
       const res = await api.get('/movimientos', { params });
       setMovimientos(res.data.data || []);
       setTotal(res.data.total || 0);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchMovements();
-  }, [page, tipo, almacenID, desde, hasta]);
+  useEffect(() => { fetchMovements(); }, [page, tipo, almacenID, desde, hasta]);
 
   const columns = useMovimientoColumns();
+  const canCreate = hasRole('Administrador', 'Encargado de almacén', 'Técnico');
 
   const exportHeaders = ['Tipo', 'Elemento', 'Cantidad', 'Origen', 'Destino', 'Motivo', 'Documento', 'Fecha'];
   const exportRows = movimientos.map((m) => [
-    m.tipo,
-    m.activo ? m.activo.codigo_activo : m.item ? m.item.nombre : '',
-    m.cantidad,
-    m.almacen_origen?.nombre || '',
+    m.tipo, m.activo ? m.activo.codigo_activo : m.item ? m.item.nombre : '',
+    m.cantidad, m.almacen_origen?.nombre || '',
     m.almacen_destino?.nombre || (m.usuario_destino?.nombre_completo || ''),
-    m.motivo || '',
-    m.documento || '',
-    new Date(m.fecha).toLocaleString(),
+    m.motivo || '', m.documento || '', new Date(m.fecha).toLocaleString(),
   ]);
 
   return (
@@ -62,27 +56,36 @@ export const MovimientosList: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-xl font-bold text-slate-800 tracking-tight flex items-center">
-            <ArrowLeftRight className="w-5 h-5 mr-2 text-blue-600" />
-            Bitácora de Movimientos
+            <ArrowLeftRight className="w-5 h-5 mr-2 text-blue-600" /> Bitácora de Movimientos
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">Registro cronológico de entradas, salidas y transferencias</p>
         </div>
-        <ExportButtons title="Bitácora de Movimientos" filename="movimientos" headers={exportHeaders} data={exportRows} />
+        <div className="flex items-center space-x-2.5">
+          <ExportButtons title="Bitácora de Movimientos" filename="movimientos" headers={exportHeaders} data={exportRows} />
+          {canCreate && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition shadow-sm"
+            >
+              <Plus className="w-4 h-4 mr-1.5" /> Registrar Movimiento
+            </button>
+          )}
+        </div>
       </div>
 
       <MovimientosFilterBar
-        tipo={tipo}
-        setTipo={setTipo}
-        almacenID={almacenID}
-        setAlmacenID={setAlmacenID}
-        desde={desde}
-        setDesde={setDesde}
-        hasta={hasta}
-        setHasta={setHasta}
-        almacenes={almacenes}
+        tipo={tipo} setTipo={setTipo} almacenID={almacenID} setAlmacenID={setAlmacenID}
+        desde={desde} setDesde={setDesde} hasta={hasta} setHasta={setHasta} almacenes={almacenes}
       />
-
       <DataTable columns={columns} data={movimientos} isLoading={loading} totalItems={total} currentPage={page} pageSize={20} onPageChange={setPage} />
+
+      {isModalOpen && (
+        <RegistrarMovimientoModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={fetchMovements}
+        />
+      )}
     </div>
   );
 };

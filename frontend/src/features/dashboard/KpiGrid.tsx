@@ -1,6 +1,7 @@
 import React from 'react';
-import { Laptop, DollarSign, UserCheck, Wrench, AlertTriangle, Boxes } from 'lucide-react';
+import { Laptop, Coins, UserCheck, Wrench, AlertTriangle, Boxes } from 'lucide-react';
 import { DashboardMetrics } from '../../core/types';
+import { formatSoles } from '../../shared/utils/currency';
 
 interface KpiGridProps {
   metrics: DashboardMetrics | null;
@@ -9,7 +10,7 @@ interface KpiGridProps {
 export const KpiGrid: React.FC<KpiGridProps> = ({ metrics }) => {
   const kpis = [
     { title: 'Total Activos', value: metrics?.total_activos || 0, icon: Laptop, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { title: 'Valor Inventario', value: `$${(metrics?.valor_total_inventario || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { title: 'Valor Inventario', value: formatSoles(metrics?.valor_total_inventario), icon: Coins, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { title: 'Asignados', value: metrics?.activos_asignados || 0, icon: UserCheck, color: 'text-blue-600', bg: 'bg-blue-50' },
     { title: 'En Mantenimiento', value: metrics?.en_mantenimiento || 0, icon: Wrench, color: 'text-amber-600', bg: 'bg-amber-50' },
     { title: 'Stock Crítico', value: metrics?.items_stock_critico || 0, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', alert: (metrics?.items_stock_critico || 0) > 0 },
@@ -33,4 +34,3 @@ export const KpiGrid: React.FC<KpiGridProps> = ({ metrics }) => {
     </div>
   );
 };
-

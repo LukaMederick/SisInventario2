@@ -50,7 +50,7 @@ export const ActivoDetailsFields: React.FC<ActivoDetailsFieldsProps> = ({
     </div>
 
     <div>
-      <label className="block text-xs font-semibold text-slate-700 mb-1">Precio de Compra ($ USD)</label>
+      <label className="block text-xs font-semibold text-slate-700 mb-1">Precio de Compra (S/.)</label>
       <input
         type="number"
         step="0.01"
